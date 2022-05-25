@@ -235,9 +235,8 @@ class NMTreeModel(nn.Module):
                 sbj_score = self.single_score(v, sbj_embedding)
             else:
                 sbj_score = self.zero_score
-
+                
             s = sbj_score + tree.score
-
             scores.append(s)
 
         if is_show:

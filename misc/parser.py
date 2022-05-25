@@ -74,12 +74,11 @@ def doc_to_tree(doc):
 def transfer_dataset(refer):
     nlp = spacy.load('en_core_web_sm', disable=['ner'])
     sentToTokens = refer.sentToTokens  # refer.Sents: 'raw', 'sent', 'tokens'
-    if refer.data['dataset'] == 'refcocog':
-        error_sents = {268: "a yellow surfboard with a black nose", 29232: "skater in white t - shirt"}
-    elif refer.data['dataset'] == 'refcoco':
-        error_sents = {115787: "all food on table"}
-    elif refer.data['dataset'] == 'refcoco+':
+    if refer.data['dataset'] == 'rsvg':
         error_sents = {}
+    else:
+        print('Not Implemented!')
+        assert False
 
     # extract raw data, for multi-processing
     sents = []
@@ -96,7 +95,7 @@ def transfer_dataset(refer):
     # processing data: prune punct and convert all verb to v-ing
     new_sents = []
     pbar = tqdm(total=len(sents))
-    for idx, doc in enumerate(nlp.pipe(sents, batch_size=256, n_threads=16, disable=['parser'])):
+    for idx, doc in enumerate(nlp.pipe(sents, batch_size=256, disable=['parser'])):
         new_sent, new, old_sent, old = doc_prune(doc)
         new_sents.append(new_sent)
 
@@ -114,7 +113,7 @@ def transfer_dataset(refer):
     tag_list = []
     dep_list = []
     pbar = tqdm(total=len(new_sents))
-    for idx, doc in enumerate(nlp.pipe(new_sents, batch_size=256, n_threads=16)):
+    for idx, doc in enumerate(nlp.pipe(new_sents, batch_size=256)):
         t, s = doc_to_tree(doc)
 
         tree_list.append(t)
@@ -210,10 +209,10 @@ def prepare_data(refer, trees):
 
 def main(opt):
     # dataset_split_by
-    data_root, dataset, split_by = opt.data_root, opt.dataset, opt.split_by
+    data_root, dataset = opt.data_root, opt.dataset
 
     # load refer
-    refer = REFER(data_root, dataset, split_by)
+    refer = REFER(data_root, dataset)
 
     # transfer dataset to multi-branches
     trees = transfer_dataset(refer)
@@ -237,10 +236,10 @@ def main(opt):
                'tag_to_ix': ttoi,
                'dep_to_ix': dtoi,
                'cat_to_ix': {cat_name: cat_id for cat_id, cat_name in refer.Cats.items()}, },
-              open(osp.join('data/feats', dataset + '_' + split_by, opt.output_json), 'w'))
+              open(osp.join('data/feats', dataset, opt.output_json), 'w'))
     print('%s written.' % osp.join('data/feats', opt.output_json))
 
-    torch.save(trees, osp.join('data/feats', dataset + '_' + split_by, opt.output_pth))
+    torch.save(trees, osp.join('data/feats', dataset, opt.output_pth))
     print('%s written.' % osp.join('data/feats', opt.output_pth))
 
 if __name__ == '__main__':
@@ -248,8 +247,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_json', default='data_dep.json')
     parser.add_argument('--output_pth', default='data_dep.pth')
     parser.add_argument('--data_root', default='data/datasets', type=str)
-    parser.add_argument('--dataset', default='refcocog', type=str, help='refcoco/refcoco+/refcocog')
-    parser.add_argument('--split_by', default='umd', type=str, help='unc/google/umd')
+    parser.add_argument('--dataset', default='rsvg', type=str, help='rsvg')
     parser.add_argument('--word_count_threshold', default=1, type=int)
 
     opt = parser.parse_args()

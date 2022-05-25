@@ -38,7 +38,7 @@ def eval_gt_split(loader, model, crit, split, opt, is_dump_json=False):
     iterations = 0.0
     while True:
         data = loader.get_data(split)
-
+        
         # forward
         scores = model(data)
         if crit:
@@ -100,7 +100,7 @@ def eval_det_split(loader, model, crit, split, opt, is_dump_json=False):
         data = loader.get_data(split)
         
         scores = model(data)
-    
+        
         if crit:
             target = train_utils.computeLabels(data['gd_boxes'], \
                 [loader.Dets[a]['box'] for a in data['det_ids']])
@@ -119,7 +119,7 @@ def eval_det_split(loader, model, crit, split, opt, is_dump_json=False):
             pred_box = loader.Dets[pred_det_id]['box']
             gd_box = data['gd_boxes'][ix]
 
-            if computeIoU(pred_box, gd_box) >= 0.5:
+            if computeIoU(pred_box, gd_box) >= opt['iou_threshold']:
                 acc += 1
             n += 1
 

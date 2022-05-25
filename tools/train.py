@@ -43,7 +43,7 @@ def main(opt):
     random.seed(opt.seed)
 
     # initialize
-    opt.dataset_split_by = opt.dataset + '_' + opt.split_by
+    opt.dataset_split_by = opt.dataset
     checkpoint_dir = os.path.join(opt.checkpoint_path, opt.dataset_split_by + '_' + opt.id)
     if not os.path.isdir(checkpoint_dir):
         os.makedirs(checkpoint_dir)
@@ -126,7 +126,9 @@ def main(opt):
     if opt.glove and not opt.start_from:
         glove_weight = load_glove(glove=opt.glove, vocab=loader.word_to_ix, opt=opt)
         assert glove_weight.shape == model.word_embedding.weight.size()
-        model.word_embedding.weight.data.set_(torch.cuda.FloatTensor(glove_weight))
+        #model.word_embedding.weight.data.set_(torch.cuda.FloatTensor(glove_weight))
+        with torch.no_grad():
+            model.word_embedding.weight.set_(torch.cuda.FloatTensor(glove_weight))
         print("Load word vectors ...")
 
     # start training
@@ -196,10 +198,7 @@ def main(opt):
             val_loss_history[iteration] = val_loss
             val_accuracies.append(val_accuracy)
 
-            if opt.split_by == 'unc':
-                test_split = 'testA'
-            else:
-                test_split = 'test'
+            test_split = 'test'
             test_acc, test_n, test_loss = eval_utils.eval_gt_split(loader, model, crit, test_split, vars(opt))
             test_accuracy = test_acc / test_n * 100
             print("%s set evaluated. test_loss = %.2f, acc = %d / %d = %.2f%%" %

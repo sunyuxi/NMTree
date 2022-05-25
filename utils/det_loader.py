@@ -20,7 +20,7 @@ class DetLoader(Loader):
 
         self.opt = opt
         self.batch_size = opt.batch_size
-        self.vis_dim = 2048 + 512 + 512
+        self.vis_dim = 256 + 512 + 512
 
         # img_iterators for each split
         self.split_ix = {}

@@ -30,9 +30,9 @@ import itertools
 
 
 class REFER:
-    def __init__(self, data_root, dataset='refcoco', splitBy='unc'):
+    def __init__(self, data_root, dataset='rsvg'):
         # provide data_root folder which contains refcoco, refcoco+ and refcocog
-        if dataset not in ['refcoco', 'refcoco+', 'refcocog']:
+        if dataset not in ['rsvg']:
             print('No refer dataset is called [%s]' % dataset)
             sys.exit()
 
@@ -41,13 +41,13 @@ class REFER:
 
         # load refs from data/dataset/refs(dataset).json
         tic = time.time()
-        ref_file = osp.join(self.DATA_DIR, 'refs('+splitBy+').p')
+        ref_file = osp.join(self.DATA_DIR, 'refs_'+dataset+'.p')
         self.data = {}
         self.data['dataset'] = dataset
-        self.data['refs'] = pickle.load(open(ref_file, 'rb'), encoding='utf-8')
+        self.data['refs'] = pickle.load(open(ref_file, 'rb'))
 
         # load annotations from data/dataset/instances.json
-        instances_file = osp.join(self.DATA_DIR, 'instances.json')
+        instances_file = osp.join(self.DATA_DIR, 'instances_'+dataset+'.json')
         instances = json.load(open(instances_file, 'r'))
         self.data['images'] = instances['images']
         self.data['annotations'] = instances['annotations']

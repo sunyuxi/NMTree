@@ -22,8 +22,7 @@ def parse_eval_opt():
 
     # General Settings
     parser.add_argument('--log_path', type=str, required=True)
-    parser.add_argument('--dataset', type=str, default='refcocog')
-    parser.add_argument('--split_by', type=str, default='umd')
+    parser.add_argument('--dataset', type=str, default='rsvg')
     parser.add_argument('--load_best', type=bool, default=True)
     parser.add_argument('--split', type=str, default='all', help="val/test/all")
     parser.add_argument('--visual_feat_file', type=str, default='matt_res_gt_feats.pth')
@@ -51,7 +50,7 @@ def split_eval(opt):
     with open(infos_path, 'rb') as f:
         infos = json.load(f)
 
-    ignore = ['visual_feat_file', 'dataset', 'split_by']
+    ignore = ['visual_feat_file', 'dataset']
     for k in infos['opt'].keys():
         if k not in ignore:
             if k in vars(opt):
@@ -60,10 +59,10 @@ def split_eval(opt):
                 vars(opt).update({k: infos['opt'][k]})  # copy over options from model
 
     # set up loader
-    data_json = os.path.join(opt.feats_path, opt.dataset+'_'+opt.split_by, opt.data_file+'.json')
-    visual_feats_dir = os.path.join(opt.feats_path, opt.dataset+'_'+opt.split_by, opt.visual_feat_file)
-    data_pth = os.path.join(opt.feats_path, opt.dataset+'_'+opt.split_by, opt.data_file + '.pth')
-    visual_feats_dir = os.path.join(opt.feats_path, opt.dataset+'_'+opt.split_by, opt.visual_feat_file)
+    data_json = os.path.join(opt.feats_path, opt.dataset, opt.data_file+'.json')
+    visual_feats_dir = os.path.join(opt.feats_path, opt.dataset, opt.visual_feat_file)
+    data_pth = os.path.join(opt.feats_path, opt.dataset, opt.data_file + '.pth')
+    visual_feats_dir = os.path.join(opt.feats_path, opt.dataset, opt.visual_feat_file)
 
     if os.path.isfile(data_pth):
         loader = GtLoader(data_json, visual_feats_dir, opt, data_pth)
@@ -88,20 +87,18 @@ def split_eval(opt):
 
     # Evaluate all sets
     acc = {}
-    print("Start evaluating %s" % opt.dataset+'_'+opt.split_by)
+    print("Start evaluating %s" % opt.dataset)
     if opt.split in ['all', 'val']:
         acc, n, _ = eval_utils.eval_gt_split(loader, model, None, 'val', vars(opt), opt.dump_json)
         show_acc(acc, n, split='val')
 
     if opt.split in ['all', 'test']:
-        if opt.dataset in ['refcoco', 'refcoco+']:
-            acc, n, _ = eval_utils.eval_gt_split(loader, model, None, 'testA', vars(opt), opt.dump_json)
-            show_acc(acc, n, split='testA')
-            acc, n, _ = eval_utils.eval_gt_split(loader, model, None, 'testB', vars(opt), opt.dump_json)
-            show_acc(acc, n, split='testB')
-        else:
+        if opt.dataset in ['rsvg']:
             acc, n, _ = eval_utils.eval_gt_split(loader, model, None, 'test', vars(opt), opt.dump_json)
             show_acc(acc, n, split='test')
+        else:
+            print('Not Implemented')
+            assert False
 
     print("All sets evaluated.")
 

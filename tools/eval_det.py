@@ -22,11 +22,12 @@ def parse_eval_opt():
 
     # General Settings
     parser.add_argument('--id', type=str, required=True)
-    parser.add_argument('--dataset', type=str, default='refcocog')
-    parser.add_argument('--split_by', type=str, default='umd')
+    parser.add_argument('--dataset', type=str, default='rsvg')
     parser.add_argument('--visual_feat_file', type=str, default='matt_res_det_feats.pth')
     parser.add_argument('--load_best', type=bool, default=True)
     parser.add_argument('--split', type=str, default='all', help="val/test/all")
+    
+    parser.add_argument('--iou_threshold', type=float, default=0.5, help='iou threshold')
 
     parser.add_argument('--log_path', type=str, default='log')
     parser.add_argument('--dump_json', type=bool, default=True)
@@ -44,8 +45,8 @@ def split_eval(opt):
     # Set path
     infos_file = 'infos-best.json' if opt.load_best else 'infos-best.json'
     model_file = 'model-best.pth' if opt.load_best else 'model.pth'
-    infos_path = os.path.join(opt.log_path, opt.dataset+'_'+opt.split_by+'_'+opt.id, infos_file)
-    model_path = os.path.join(opt.log_path, opt.dataset + '_' + opt.split_by + '_' + opt.id, model_file)
+    infos_path = os.path.join(opt.log_path, opt.dataset +'_'+opt.id, infos_file)
+    model_path = os.path.join(opt.log_path, opt.dataset + '_' + opt.id, model_file)
 
     # Load infos
     with open(infos_path, 'rb') as f:
@@ -64,7 +65,7 @@ def split_eval(opt):
     data_pth = os.path.join(opt.feats_path, opt.dataset_split_by, opt.data_file + '.pth')
     visual_feats_dir = os.path.join(opt.feats_path, opt.dataset_split_by, opt.visual_feat_file)
     dets_json = os.path.join('data/detections', opt.dataset_split_by, \
-                                'res101_coco_minus_refer_notime_dets.json')
+                                'res50_dota_v1_0_RoITransformer_dets.json')
 
     if os.path.isfile(data_pth):
         loader = DetLoader(data_json, dets_json, visual_feats_dir, opt, data_pth)
@@ -84,25 +85,24 @@ def split_eval(opt):
 
     # set up model and criterion
     model = models.setup(opt, loader).cuda()
+    print(model_path)
     model.load_state_dict(torch.load(model_path))
     model.eval()
 
     # Evaluate all sets
     acc = {}
-    print("Start evaluating %s" % opt.dataset+'_'+opt.split_by)
+    print("Start evaluating %s" % opt.dataset)
     if opt.split in ['all', 'val']:
         acc, n, _ = eval_utils.eval_det_split(loader, model, None, 'val', vars(opt), opt.dump_json)
         show_acc(acc, n, split='val')
 
     if opt.split in ['all', 'test']:
-        if opt.dataset in ['refcoco', 'refcoco+']:
-            acc, n, _ = eval_utils.eval_det_split(loader, model, None, 'testA', vars(opt), opt.dump_json)
-            show_acc(acc, n, split='testA')
-            acc, n, _ = eval_utils.eval_det_split(loader, model, None, 'testB', vars(opt), opt.dump_json)
-            show_acc(acc, n, split='testB')          
-        else:
+        if opt.dataset in ['rsvg']:
             acc, n, _ = eval_utils.eval_det_split(loader, model, None, 'test', vars(opt), opt.dump_json)
-            show_acc(acc, n, split='test')
+            show_acc(acc, n, split='test')          
+        else:
+            print('Not Implemented')
+            assert False
 
     print("All sets evaluated.")
 

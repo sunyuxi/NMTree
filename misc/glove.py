@@ -36,7 +36,7 @@ def create_glove(path, vocab, opt):
 
 def load_glove(glove, vocab, opt):
     # assert glove in ["glove.840B.300d", ]
-    opt.dataset_split_by = opt.dataset + '_' + opt.split_by
+    opt.dataset_split_by = opt.dataset
     txt_path = os.path.join(opt.feats_path, 'glove.840B.300d.txt')
     pkl_path = os.path.join(opt.feats_path, opt.dataset_split_by, glove+'.pkl')
 

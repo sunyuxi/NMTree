@@ -19,7 +19,7 @@ class GtLoader(Loader):
 
         self.opt = opt
         self.batch_size = opt.batch_size
-        self.vis_dim = 2048 + 512 + 512
+        self.vis_dim = 256 + 512 + 512
 
         # img_iterators for each split
         self.split_ix = {}
@@ -31,6 +31,7 @@ class GtLoader(Loader):
         pickle.Unpickler = partial(pickle.Unpickler, encoding="latin1")
         self.visual_feats = torch.load(visual_feats_dir,
             map_location=lambda storage, loc: storage, pickle_module=pickle)
+        #print(self.visual_feats[7718].shape)
         print('loaded')
 
         if tree_pth:

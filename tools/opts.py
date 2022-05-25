@@ -7,7 +7,6 @@ def parse_opt():
     # General settings
     parser.add_argument('--id', type=str, required=True)
     parser.add_argument('--dataset', type=str, required=True)
-    parser.add_argument('--split_by', type=str, required=True)
     parser.add_argument('--grounding_model', type=str, required=True)
     parser.add_argument('--batch_size', type=int, required=True)
 
