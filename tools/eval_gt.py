@@ -34,10 +34,12 @@ def parse_eval_opt():
     return args
 
 
-def show_acc(acc, n, split='test'):
+def show_acc(acc, n, split='test', iou_threshold=0.5, dataset='rsvg', f_handle=None):
     eval_accuracy = acc / n
     print("%s set evaluated. acc = %d / %d = %.2f%%" % (split, acc, n, eval_accuracy*100))
-
+    if f_handle is not None:
+        f_handle.write('[%s][%s], acc@{%.2f} is %.2f%%\n' % \
+          (dataset, split, iou_threshold, eval_accuracy*100.0))
 
 def split_eval(opt):
     # Set path
@@ -86,19 +88,23 @@ def split_eval(opt):
     model.eval()
 
     # Evaluate all sets
+    f = open(os.path.join(opt.log_path, opt.dataset +'_'+opt.id, 'gt_results.txt'), 'a')
+
     acc = {}
     print("Start evaluating %s" % opt.dataset)
     if opt.split in ['all', 'val']:
         acc, n, _ = eval_utils.eval_gt_split(loader, model, None, 'val', vars(opt), opt.dump_json)
-        show_acc(acc, n, split='val')
+        show_acc(acc, n, split='val', iou_threshold=opt.iou_threshold, dataset=opt.dataset, f_handle=f)
 
     if opt.split in ['all', 'test']:
         if opt.dataset in ['rsvg']:
             acc, n, _ = eval_utils.eval_gt_split(loader, model, None, 'test', vars(opt), opt.dump_json)
-            show_acc(acc, n, split='test')
+            show_acc(acc, n, split='test', iou_threshold=opt.iou_threshold, dataset=opt.dataset, f_handle=f)
         else:
             print('Not Implemented')
             assert False
+    
+    f.close()
 
     print("All sets evaluated.")
 

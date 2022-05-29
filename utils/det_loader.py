@@ -26,6 +26,7 @@ class DetLoader(Loader):
         self.split_ix = {}
         self.iterators = {}
 
+        print(('filepath', dets_json))
         # prepare dets
         self.dets = json.load(open(dets_json))
         self.Dets = {det['det_id']: det for det in self.dets}
@@ -36,6 +37,11 @@ class DetLoader(Loader):
         for det in self.dets:
             image = self.Images[det['image_id']]
             image['det_ids'] += [det['det_id']]
+
+        #for imgid in self.Images:
+        #    if imgid == 3272:
+        #        print(sorted(self.Images[imgid]['det_ids']))
+        #    print(('imgid, len(dets)', imgid, len(self.Images[imgid]['det_ids']))) #
 
         # load visual feats
         print('loading visual feats ...')
@@ -97,7 +103,7 @@ class DetLoader(Loader):
                 sent_ids += [sent_id]
                 gd_boxes += [self.Refs[ref_id]['box']]
                 vis += [self.visual_feats[sent_id]]
-                
+                #print(('imageid, sentid, len(detid), feat_shape', image_id, sent_id, len(det_ids), vis[-1].shape))
                 if self.trees:
                     trees += [self.trees[sent_id]['tree']]
                     sents += [self.trees[sent_id]]
@@ -120,7 +126,7 @@ class DetLoader(Loader):
         data['sents'] = sents
         if self.trees:
             data['trees'] = trees
-
+        #print(('debug', len(det_ids), vis.shape, len(sents)))
         data['gd_boxes'] = gd_boxes
         data['sent_ids'] = sent_ids
         data['det_ids'] = det_ids

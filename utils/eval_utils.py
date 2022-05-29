@@ -113,6 +113,7 @@ def eval_det_split(loader, model, crit, split, opt, is_dump_json=False):
 
         det_ids = data['det_ids']
         sent_ids = data['sent_ids']
+        #print(('pred_ix,det_ids,sent_ids', len(data['trees']), data['vis'].size(), data.keys(), scores.shape, pred_ix, len(det_ids), len(sent_ids)))
 
         for ix, sent_id in enumerate(sent_ids):
             pred_det_id = det_ids[pred_ix[ix]]
